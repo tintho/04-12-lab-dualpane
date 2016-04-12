@@ -11,11 +11,16 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.On
 
     private static final String TAG = "MainActivity";
 
+    private boolean isDualPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        isDualPane = (findViewById(R.id.container_right) != null) &&
+                (findViewById(R.id.container_right).getVisibility()== View.VISIBLE);
 
         MoviesFragment fragment = (MoviesFragment)getSupportFragmentManager().findFragmentByTag("MoviesFragment");
         if(fragment == null) {
@@ -23,7 +28,11 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.On
         }
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.container, fragment, "MoviesFragment");
+        if(isDualPane) {
+            ft.replace(R.id.container_left,fragment, "MoviesFragment");
+        } else {
+            ft.replace(R.id.container, fragment, "MoviesFragment");
+        }
         ft.commit();
     }
 
@@ -39,9 +48,15 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.On
 
         if(fragment == null){
             fragment = new MoviesFragment();
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, fragment, null)
-                    .commit();
+            if(isDualPane) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container_left, fragment, null)
+                        .commit();
+            } else {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container, fragment, null)
+                        .commit();
+            }
         }
 
         fragment.fetchData(searchTerm);
@@ -58,10 +73,15 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.On
         DetailFragment detailFragment = new DetailFragment();
         detailFragment.setArguments(bundle);
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, detailFragment, null)
-                .addToBackStack(null)
-                .commit();
-
+        if(isDualPane) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container_right, detailFragment, null)
+                    .commit();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, detailFragment, null)
+                    .addToBackStack(null)
+                    .commit();
+        }
     }
 }
